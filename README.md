@@ -2,7 +2,7 @@
 To extract set of signals from a MDF4 (mf4) files
 
 ## Features
-	* Create **mdfSubset** in two ways
+	* Create __mdfSubset__ in two ways
 		* Instantiate with a list of 'asammdf.Signals'
 		* Create a new subset from a larger MDF(.mf4) file with a list of signals in csv 
 	* Concatinate two mdfSubsets to create a new file (joins the each signals)
@@ -19,8 +19,6 @@ To extract set of signals from a MDF4 (mf4) files
 	
 ## Installation
 
-pip
-	1. pip install mf4-parser
+pip :: pip install mf4-parser
 	
-git
-	1. clone the repo [mf4-parser](https://github.com/sridhar-eswaran/mf4-parser.git)
+git :: clone the repo [mf4-parser](https://github.com/sridhar-eswaran/mf4-parser.git)
