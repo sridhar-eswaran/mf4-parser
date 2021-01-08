@@ -1,0 +1,4 @@
+Name,Type,Signal
+LongitudinalSpeed,Cont,Vx_mps
+LongAcceleration,Cont,Ax_mps2
+SystemStatus,State,Mode_ACC
