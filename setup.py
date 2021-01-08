@@ -6,7 +6,7 @@ with open('README.md') as fh:
 
 setup(
     name="mf4-parser",
-    version="0.0.1",
+    version="0.0.2",
     description="A Python package to extract signals from MDF4 files.",
     long_description=README,
     long_description_content_type="text/markdown",
