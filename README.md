@@ -19,6 +19,8 @@ To extract set of signals from a MDF4 (mf4) files
 	
 ## Installation
 
-pip :: pip install mf4-parser
+### pip 
+	pip install mf4-parser
 	
-git :: clone the repo [mf4-parser](https://github.com/sridhar-eswaran/mf4-parser.git)
+### git 
+	clone the repo [mf4-parser](https://github.com/sridhar-eswaran/mf4-parser.git)
