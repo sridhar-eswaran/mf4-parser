@@ -7,22 +7,8 @@ Created on Thu Jan  7 11:33:00 2021
 from asammdf import MDF
 import pandas as pd
 import numpy as np
-from pathlib import Path
 
 class mdfSubset:  
-        """        
-        Parameters
-        ----------
-        subsetDataAslist : List
-            List of ASAM Signal objects
-        mdfname : string
-            name for the new object
-        Returns
-        -------
-        TYPE
-            returns a object with signallist and filename
-
-        """
         def __init__(self,subsetDataAslist,mdfname): 
             if isinstance(subsetDataAslist,list):
                     self.subsetList = subsetDataAslist 
@@ -31,37 +17,25 @@ class mdfSubset:
                 print('Incorrect object datatype')
         
         def createSubset(filepath_MF4,filepath_signalListCsv):
-            """        
-            Parameters
-            ----------
-            filepath_MF4 : windowsPath / string
-                either windowsPath or a string of full windows path of the file
-            filepath_signalListCsv : csv
-                Must contain Columns [Name,Type,Signal]
-                Name: Display name of a signal
-                Type: 'Cont' or 'State' 
-                    e.g. speed/ accel -> continous | status(on/off) -> state based (enums)
-            Returns
-            -------
-            TYPE
-                returns a list with signals extracted (listed in csv) from mf4 and filename
-            """
-            filename = Path(filepath_MF4).name
+            filename = filepath_MF4.split('\\')[-1].split('/')[-1].split('.')[0]
             mf4data = MDF(filepath_MF4)
             signalCsv = pd.read_csv(filepath_signalListCsv)
             subsetList = []
             noSigMissing = 0
-            for signals in range(20): #len(signalCsv iterate for all signal in the CSV
+            for signals in range(len(signalCsv)): #len(signalCsv iterate for all signal in the CSV
                 try:                      
                     sg_pos=mf4data.whereis(signalCsv.Signal[signals])            
                     for k in range(len(sg_pos)): # valid group and channel selection
                         gr_nr = sg_pos[k][0] # k is the list index of available channel groups
                         ch_nr = sg_pos[k][1] 
                         sdata = mf4data.get(None,gr_nr,ch_nr) # find the signal 
-                      
-                    sdata.Type=signalCsv.Type[signals] 
-                    sdata.display_name = signalCsv.Name[signals]
-                    subsetList.append(sdata)           
+                    
+                    if len(sdata) > 0:
+                        sdata.Type=signalCsv.Type[signals] 
+                        sdata.display_name = signalCsv.Name[signals]
+                        subsetList.append(sdata)  
+                    else:
+                        raise Exception('No samples found for signal')          
                 except:     # signal not found in the measurement file 
                     noSigMissing +=1
                     print(f'{noSigMissing}. {signalCsv.Name[signals]} not found')                        
@@ -69,25 +43,6 @@ class mdfSubset:
     
     
         def mdfConcat(mdfObjSubsetBase,mdfObjSubsetIncoming,newMdfname):
-            """
-            mdfConcat(mdfObjSubsetBase,mdfObjSubsetIncoming,newMdfname)
-            Signal names and index should match in both the files
-
-            Parameters
-            ----------
-            mdfObjSubsetBase : mdfSubsetObject
-                source module: subset created using createSubset method
-            mdfObjSubsetIncoming : mdfSubsetObject
-                append module: subset created using createSubset method
-            newMdfname : string
-                new name for the concatinated module.
-
-            Returns
-            -------
-            TYPE
-                mdfSubsetObject -> mdfObjSubsetBase + mdfObjSubsetIncoming
-
-            """
             dataBase = mdfObjSubsetBase.subsetList
             dataIn = mdfObjSubsetIncoming.subsetList
             subsetListMerged = []
@@ -104,13 +59,9 @@ class mdfSubset:
             return [sample.timestamps[0],sample.timestamps[-1]]
         
         def getSignalNames(self):
-            data = self.subsetList
-            names = []
-            for signals in range(len(data)):
-                names.append(data[signals].name)
+            names = [signals.display_name for signals in self.subsetList]
             return names
-                
-        
+                        
         def getSamplesize(self,signalName):
             data = self.subsetList
             samples = 0        
@@ -135,7 +86,7 @@ class mdfSubset:
                         resampled = data[signals].interp(timesteps)
                         subsetListResampled.append(resampled)
                 elif data[signals].Type == 'Cont': # continous signals physical mesurement signals
-                        resampled = data[signals].interp(timesteps,interpolation_mode = '1') 
+                        resampled = data[signals].interp(timesteps,integer_interpolation_mode = '1') 
                         subsetListResampled.append(resampled)
             return mdfSubset(subsetListResampled,fname)
         
@@ -143,17 +94,18 @@ class mdfSubset:
             data = self.subsetList 
             dataSeries = []
             for signals in range(len(data)):
-                samples = data[signals].samples   
+                sample = data[signals].samples   
                 timestamps = data[signals].timestamps
-                series = pd.Series(samples,timestamps,name = data[signals].display_name)
-                if isinstance(samples[0],bytes): #convert data type for enumarated values like ACCStatus, TSRSpdLimit
+                series = pd.Series(sample,timestamps,name = data[signals].display_name)
+                if len(sample)>0 and isinstance(sample[0],bytes): #convert data type for enumarated values like ACCStatus, TSRSpdLimit
                     values=[]    
-                    for timestep in range(len(samples)):
-                        values.append(samples[timestep].decode("utf-8"))                    
+                    for timestep in range(len(sample)):
+                        values.append(sample[timestep].decode("utf-8"))                    
                     series = pd.Series(values,timestamps,name = data[signals].display_name)
+                    #(values,timestamps,name = data[signals].display_name)
                     dataSeries.append(series)                
                 else: # signals does not require conversion, non-byte data types like A1,A2,etc
-                    dataSeries.append(series) 
+                        dataSeries.append(series) 
             return dataSeries
         
         def createDataTable(self,timesteps):
@@ -166,23 +118,25 @@ class mdfSubset:
             return dataTable
                 
         def exportCSV(self,timesteps,outputFilename):
-            """
-            exportCSV(timesteps,'outputFilename.csv')
-            
-            Parameters
-            ----------
-            timesteps : float/int
-                >0 to <2
-            outputFilename : string include .csv
-                file name for output CSV
-
-            Returns
-            -------
-            None.
-
-            """
             datatable = self.createDataTable(timesteps)
             datatable.to_csv(outputFilename,index_label='timestamps')
+            
+        def getMultipleSignals(self,signalnameList):
+            data = self.subsetList
+            try:
+                signalList = [signal for signal in data for name in signalnameList if signal.display_name == name]
+            except:
+                print('Some signals not found')  
+                signalList =[]
+            return signalList
 
+        def getSignal(self,signalname):
+            data = self.subsetList
+            try:
+                signal = [signal for signal in data if signal.display_name == signalname]
+            except:
+                print('signal not found')
+                signal = []
+            return signal[0]
     
     

@@ -6,7 +6,7 @@ with open('README.md') as fh:
 
 setup(
     name="mf4parser",
-    version="0.0.3",
+    version="1.0.1",
     description="A Python package to extract signals from MDF4 files.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -17,12 +17,14 @@ setup(
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Programming Language :: Python :: 3",
+		"Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
 		"Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
 		"Operating System :: OS Independent",
     ],
 	py_modules=["mf4parser"],
     package_dir={'':'src'},
     include_package_data=True,
-    install_requires=["asammdf","pandas","numpy","pathlib"],
+    install_requires=["asammdf","pandas","numpy"],
 )
