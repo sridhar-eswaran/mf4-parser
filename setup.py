@@ -6,7 +6,7 @@ with open('README.md') as fh:
 
 setup(
     name="mf4parser",
-    version="1.0.1",
+    version="1.1.1",
     description="A Python package to extract signals from MDF4 files.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -26,5 +26,5 @@ setup(
 	py_modules=["mf4parser"],
     package_dir={'':'src'},
     include_package_data=True,
-    install_requires=["asammdf","pandas","numpy"],
+    install_requires=["asammdf","pandas","numpy","pyexcel-xlsx","pyexcel-xls","pyyaml","xlrd","xlsx","xlsxwriter"],
 )
