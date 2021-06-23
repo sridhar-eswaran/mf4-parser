@@ -23,9 +23,9 @@ class mdfSubset:
             subsetList = []
             noSigMissing = 0
             for signals in range(len(signalCsv)): #len(signalCsv iterate for all signal in the CSV
-                try:                      
-                    sg_pos=mf4data.whereis(signalCsv.Signal[signals])            
-                    sdata = None            
+                try:
+                    sdata = None
+                    sg_pos=mf4data.whereis(signalCsv.Signal[signals])
                     for k in range(len(sg_pos)): # valid group and channel selection
                         gr_nr = sg_pos[k][0] # k is the list index of available channel groups
                         ch_nr = sg_pos[k][1] 
